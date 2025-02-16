@@ -20,8 +20,6 @@ public class FlightController {
             @RequestParam String origin,
             @RequestParam String destination,
             @RequestParam String date) {
-        System.out.println("Endpoint hit: /api/flights");
-        System.out.println("Parameters: origin=" + origin + ", destination=" + destination + ", date=" + date);
         return flightService.getFlights(origin, destination, date);
     }
 }
