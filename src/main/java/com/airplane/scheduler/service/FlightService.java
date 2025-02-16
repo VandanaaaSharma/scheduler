@@ -1,6 +1,7 @@
 package com.airplane.scheduler.service;
 
 import com.airplane.scheduler.model.Flight;
+import com.airplane.scheduler.repository.FlightRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -27,12 +28,13 @@ public class FlightService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private FlightRepository flightRepository;
+
     public List<Flight> getFlights(String origin, String destination, String date) {
         try {
-            // Step 1: Get Access Token
             String accessToken = getAccessToken();
 
-            // Step 2: Call Amadeus API with the access token
             String url = "https://test.api.amadeus.com/v2/shopping/flight-offers" +
                          "?originLocationCode=" + origin +
                          "&destinationLocationCode=" + destination +
@@ -40,7 +42,7 @@ public class FlightService {
                          "&adults=1";
 
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + accessToken); // Add access token to headers
+            headers.set("Authorization", "Bearer " + accessToken);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -48,7 +50,12 @@ public class FlightService {
                     url, HttpMethod.GET, entity, Flight[].class);
 
             if (response.getBody() != null) {
-                return Arrays.asList(response.getBody());
+                List<Flight> flights = Arrays.asList(response.getBody());
+                
+                // Save to database
+                flightRepository.saveAll(flights);
+
+                return flights;
             } else {
                 throw new RuntimeException("No flight data found");
             }
@@ -59,20 +66,16 @@ public class FlightService {
 
     private String getAccessToken() {
         try {
-            // Step 1: Prepare the token request URL and body
             String tokenUrl = "https://test.api.amadeus.com/v1/security/oauth2/token";
             String requestBody = "grant_type=client_credentials&client_id=" + apiKey + "&client_secret=" + apiSecret;
 
-            // Step 2: Set headers for the token request
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-            // Step 3: Send the token request
             HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
             ResponseEntity<Map> response = restTemplate.postForEntity(
                     tokenUrl, request, Map.class);
 
-            // Step 4: Extract and return the access token
             if (response.getBody() != null && response.getBody().containsKey("access_token")) {
                 return response.getBody().get("access_token").toString();
             } else {

@@ -4,7 +4,8 @@ document.getElementById('flightForm').addEventListener('submit', function (e) {
     const destination = document.getElementById('destination').value;
     const date = document.getElementById('date').value;
 
-    fetch(`/api/flights?origin=${origin}&destination=${destination}&date=${date}`)
+    // Update the URL to point to the backend
+    fetch(`http://localhost:8080/api/flights?origin=${origin}&destination=${destination}&date=${date}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');

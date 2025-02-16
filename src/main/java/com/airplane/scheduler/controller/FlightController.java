@@ -1,14 +1,17 @@
 package com.airplane.scheduler.controller;
 
-import com.airplane.scheduler.model.Flight;
-import com.airplane.scheduler.service.FlightService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.airplane.scheduler.model.Flight;
+import com.airplane.scheduler.service.FlightService;
 
+@CrossOrigin(origins = "http://127.0.0.1:5500") // Allow requests from the frontend
 @RestController
 public class FlightController {
 
